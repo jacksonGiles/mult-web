@@ -1,0 +1,12 @@
+{
+    "items": [
+        {
+            "title": "MULT T-SHIRT",
+            "price": 25,
+            "img": "multtee1",
+            "sizes": ["S", "M", "L", "XL", "2XL"],
+            "selectedSize": ""
+        }
+    ],
+    "tax": 0.0975
+}
