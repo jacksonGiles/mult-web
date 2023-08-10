@@ -71,9 +71,10 @@ export default {
 
 <style>
 @import url("https://use.typekit.net/oxk2wlu.css");
+
 /* colors
 #B8DDFA // white
-#257096 // black
+#257096 // blue
 #0C2E2E // green */
 * {
   margin: 0;

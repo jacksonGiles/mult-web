@@ -59,7 +59,7 @@ export default {
 }
 .expand-icon {
   font-size: 3em;
-  z-index: 1000;
+  z-index: 100000;
   transition: transform 0.3s ease;
   filter: blur(0.75px);
   //   opacity: 95%;
