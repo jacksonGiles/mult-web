@@ -1,19 +1,33 @@
 <template>
   <div
     class="mult-page"
-    :style="{
-      'background-image':
-        'url(' + require('./assets/smudgebackground.png') + ')',
-      'background-size': '150%',
-      'background-position': bgPosition,
-    }"
+    :class="listen ? 'listen' : ''"
+    :style="
+      listen
+        ? {
+            'background-image': 'url(' + require('./assets/SMUDGE4.png') + ')',
+            'background-size': '100%',
+            'background-position': bgAltPosition,
+          }
+        : {
+            'background-image':
+              'url(' + require('./assets/smudgebackground.png') + ')',
+            'background-size': '100%',
+            'background-position': bgPosition,
+          }
+    "
     @mousemove="updateBgPosition"
   >
-    <MultHeader />
+    <MultHeader :listen="listen" />
     <transition @before-enter="beforeEnter" @enter="enter" @leave="leave">
-      <MenuOverlay v-if="menuOpen" :show="menuOpen" class="menu-overlay" />
+      <MenuOverlay
+        v-if="menuOpen"
+        :show="menuOpen"
+        :listen="listen"
+        class="menu-overlay"
+      />
     </transition>
-    <router-view />
+    <router-view @listen="listenPage" />
   </div>
 </template>
 
@@ -45,7 +59,9 @@ export default {
     return {
       image: "./assets/smudgebackground.png",
       // expandMenu: false,
-      bgPosition: "50% 50%",
+      bgPosition: "50% 100%",
+      bgAltPosition: "50% 50%",
+      listen: false,
     };
   },
   methods: {
@@ -55,15 +71,21 @@ export default {
     enter(el, done) {
       gsap.to(el, { opacity: 0.8, duration: 0.4, onComplete: done });
     },
+    enterView(el, done) {
+      gsap.to(el, { opacity: 1, duration: 0.4, onComplete: done });
+    },
     leave(el, done) {
       gsap.to(el, { opacity: 0, duration: 0.4, onComplete: done });
     },
     updateBgPosition(event) {
-      // Adjust these values to get the desired effect
       let xPercent = (event.clientX / window.innerWidth - 0.5) * 3;
       let yPercent = (event.clientY / window.innerHeight - 0.5) * 3;
 
       this.bgPosition = `${50 + xPercent / 2}% ${50 + yPercent / 2}%`;
+      this.bgAltPosition = `${50 + xPercent / 2}% ${50 + yPercent / 2}%`;
+    },
+    listenPage(listen) {
+      this.listen = listen;
     },
   },
 };
@@ -75,7 +97,8 @@ export default {
 /* colors
 #B8DDFA // white
 #257096 // blue
-#0C2E2E // green */
+#0C2E2E // green
+#181C1C // black */
 * {
   margin: 0;
 }
@@ -84,11 +107,14 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #b8ddfa;
 }
 .mult-page {
   width: 100vw;
   height: 100vh;
+}
+.listen {
+  background-color: #181c1c;
 }
 .menu-overlay {
   position: absolute;
