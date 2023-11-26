@@ -1,14 +1,32 @@
 <template>
   <div ref="menuRef" class="menu">
     <div class="menu-links">
-      <router-link class="link" to="/music" @click="closeMenu"
+      <router-link
+        class="link"
+        :class="listen ? 'listen-link' : ''"
+        to="/music"
+        @click="closeMenu"
         >MUSIC</router-link
       >
-      <router-link class="link" to="/merch" @click="closeMenu"
+      <router-link
+        class="link"
+        :class="listen ? 'listen-link' : ''"
+        to="/merch"
+        @click="closeMenu"
         >MERCH</router-link
       >
-      <router-link class="link" to="/" @click="closeMenu">CONTACT</router-link>
-      <router-link class="link" to="/about" @click="closeMenu"
+      <router-link
+        class="link"
+        :class="listen ? 'listen-link' : ''"
+        to="/contact"
+        @click="closeMenu"
+        >CONTACT</router-link
+      >
+      <router-link
+        class="link"
+        :class="listen ? 'listen-link' : ''"
+        to="/about"
+        @click="closeMenu"
         >ABOUT</router-link
       >
     </div>
@@ -17,6 +35,7 @@
 
 <script>
 export default {
+  props: ["listen"],
   methods: {
     closeMenu() {
       this.$store.dispatch("toggleMenu");
@@ -49,8 +68,15 @@ export default {
   filter: blur(0.6px);
   transition: color 0.3s ease, opacity 0.3s ease;
 }
+.listen-link {
+  color: #e8e8e8;
+}
 .link:hover {
   color: #358cb9;
   opacity: 0.8;
+}
+.listen-link:hover {
+  color: #e8e8e8;
+  opacity: 0.6;
 }
 </style>

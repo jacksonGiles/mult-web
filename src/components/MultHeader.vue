@@ -6,15 +6,27 @@
           <v-img
             class="logo-button"
             alt="Vue logo"
-            src="../assets/multlogo2.png"
+            :src="
+              listen
+                ? require('../assets/multlogo-invert1.png')
+                : require('../assets/multlogo2.png')
+            "
           />
         </button>
       </router-link>
       <button @click="expandPage()">
         <v-icon
           class="expand-icon"
-          :class="expanded ? 'expanded' : 'not-expanded'"
-          size="x-large"
+          :class="
+            listen
+              ? expanded
+                ? 'expanded listen-color'
+                : 'not-expanded listen-color'
+              : expanded
+              ? 'expanded'
+              : 'not-expanded not-expanded-color'
+          "
+          s
           >mdi-plus</v-icon
         >
       </button>
@@ -24,6 +36,7 @@
 
 <script>
 export default {
+  props: ["listen"],
   data() {
     return {
       image: "./assets/smudgebackground.png",
@@ -61,6 +74,7 @@ export default {
   font-size: 3em;
   z-index: 100000;
   transition: transform 0.3s ease;
+  // transition: color 0.3s ease, opacity 0.3s ease;
   filter: blur(0.75px);
   //   opacity: 95%;
 }
@@ -70,7 +84,18 @@ export default {
 }
 
 .not-expanded {
-  color: #111310;
   transform: rotate(0deg);
+}
+.not-expanded-color {
+  color: #111310;
+}
+
+.listen-color {
+  color: #e8e8e8;
+}
+
+.listen-color:hover {
+  color: #e8e8e8;
+  opacity: 0.6;
 }
 </style>
