@@ -22,6 +22,7 @@ export default {
   methods: {
     initThree() {
       const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x070808);
       const camera = new THREE.PerspectiveCamera(
         60,
         this.$refs.visualizerContainer.offsetWidth /
@@ -40,7 +41,6 @@ export default {
       // const geometry = new THREE.BoxGeometry(1, 1, 1);
 
       const geometry = new THREE.BufferGeometry();
-      console.log(this.songColor);
       const material = new THREE.MeshPhongMaterial({ color: this.songColor });
       const vis = new THREE.Mesh(geometry, material);
       scene.add(vis);
