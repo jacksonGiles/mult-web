@@ -1,10 +1,19 @@
 <template>
   <div>
     <div class="nav-header">
-      <router-link to="/">
+      <router-link
+        to="/"
+        :style="$vuetify.display.smAndDown ? 'margin-top: 0.5vh' : ''"
+      >
         <button class="logo-btn">
           <v-img
-            class="logo-button"
+            :class="
+              $vuetify.display.xs
+                ? 'logo-button-mobile'
+                : $vuetify.display.mdAndDown
+                ? 'logo-button-tablet'
+                : 'logo-button'
+            "
             alt="Vue logo"
             :src="
               listen
@@ -35,8 +44,17 @@
 </template>
 
 <script>
+import { gsap } from "gsap";
 export default {
   props: ["listen"],
+  mounted() {
+    gsap.from([".logo-btn", ".expand-icon"], {
+      duration: 2,
+      opacity: 0,
+      // y: -50,
+      ease: "power2.out", // easing function
+    });
+  },
   data() {
     return {
       image: "./assets/smudgebackground.png",
@@ -70,12 +88,19 @@ export default {
 .logo-button {
   width: 12vw;
 }
+.logo-button-mobile {
+  width: 40vw;
+}
+.logo-button-tablet {
+  width: 20vw;
+}
 .expand-icon {
   font-size: 3em;
   z-index: 100000;
   transition: transform 0.3s ease;
   // transition: color 0.3s ease, opacity 0.3s ease;
-  filter: blur(0.75px);
+  // filter: blur(0.6px);
+  transform: translate3d(0, 0, 0);
   //   opacity: 95%;
 }
 .expanded {
@@ -87,7 +112,7 @@ export default {
   transform: rotate(0deg);
 }
 .not-expanded-color {
-  color: #111310;
+  color: #00201f;
 }
 
 .listen-color {
