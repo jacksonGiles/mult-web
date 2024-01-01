@@ -1,17 +1,41 @@
 <template>
   <div class="listen-page">
-    <div class="song-vis-container">
-      <div class="song-list">
+    <div
+      :class="
+        $vuetify.display.smAndDown
+          ? 'song-vis-container-mobile'
+          : 'song-vis-container'
+      "
+    >
+      <LoadCube
+        v-if="!songSelected && $vuetify.display.smAndDown"
+        class="mobile-vis"
+      />
+      <AudioVisualizer
+        v-if="songSelected && $vuetify.display.smAndDown"
+        class="mobile-vis"
+        :key="visualizerKey"
+        :songSrc="songSrc"
+        :songColor="color"
+      />
+      <div
+        :class="$vuetify.display.smAndDown ? 'song-list-mobile' : 'song-list'"
+      >
         <div v-for="(song, index) in songList" :key="index">
-          <button class="song-btn" @click="setSrc(song)" color="#E8E8E8" dark>
+          <button
+            class="song-btn"
+            :style="$vuetify.display.smAndDown ? 'width: 80vw;' : ''"
+            @click="setSrc(song)"
+            color="#E8E8E8"
+            dark
+          >
             {{ song.title }}
           </button>
         </div>
       </div>
-      <!-- <transition name="fade" apppear> </transition> -->
-      <LoadCube v-if="!songSelected" />
+      <LoadCube v-if="!songSelected && !$vuetify.display.smAndDown" />
       <AudioVisualizer
-        v-if="songSelected"
+        v-if="songSelected && !$vuetify.display.smAndDown"
         :key="visualizerKey"
         :songSrc="songSrc"
         :songColor="color"
@@ -57,7 +81,7 @@ export default {
         },
         {
           title: "BACK AROUND",
-          src: require("../assets/songs/ben song rough.wav"),
+          src: require("../assets/songs/ben song with vox.wav"),
           color: 0x443371,
         },
       ],
@@ -73,8 +97,8 @@ export default {
       this.color = song.color;
       this.songSelected = true;
       this.visualizerKey++; // Increment the key
-      console.log(this.songSrc);
-      console.log(this.color);
+      // console.log(this.songSrc);
+      // console.log(this.color);
     },
   },
 };
@@ -91,6 +115,11 @@ export default {
 .song-list {
   display: grid;
 }
+.song-list-mobile {
+  display: grid;
+  height: 20vh;
+  align-content: center;
+}
 .song-vis-container {
   display: flex;
   justify-content: space-between;
@@ -98,9 +127,21 @@ export default {
   background: rgba(26, 28, 26, 0.5);
   width: 40vw;
 }
+.song-vis-container-mobile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(26, 28, 26, 0.5);
+  width: 80vw;
+  height: 60vh;
+}
+.mobile-vis {
+  height: 40vh;
+}
 .song-btn {
   color: #e8e8e8;
-  filter: blur(0.4px);
+  // filter: blur(0.4px);
   transition: color 0.3s ease, opacity 0.3s ease;
   width: 20vw;
 }
