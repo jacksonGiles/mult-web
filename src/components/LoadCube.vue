@@ -1,5 +1,5 @@
 <template>
-  <div ref="visualizerContainer" class="visualizer"></div>
+  <div ref="visualizerContainer" class="visualizer" v-once></div>
 </template>
 
 <script>
@@ -24,12 +24,15 @@ export default {
         halfY: null,
       },
       cube: null,
+
+      renderer: null,
+      camera: null,
+      geometry: null,
+      material: null,
     };
   },
   methods: {
     initThree() {
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x070808);
       const camera = new THREE.PerspectiveCamera(
         75,
         this.$refs.visualizerContainer.offsetWidth /
@@ -45,9 +48,15 @@ export default {
       );
       this.$refs.visualizerContainer.appendChild(renderer.domElement);
 
+      const scene = new THREE.Scene();
+      // scene.background = new THREE.Color(0x070808);
+
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshPhongMaterial({ color: 0xe8e8e8 });
+      this.material = material;
+      this.geometry = geometry;
       const cube = new THREE.Mesh(geometry, material);
+      this.cube = cube;
       scene.add(cube);
 
       const color = 0xe8e8e8;
@@ -69,22 +78,25 @@ export default {
 
       animate();
 
-      const onWindowResize = () => {
-        camera.aspect =
-          this.$refs.visualizerContainer.offsetWidth /
-          this.$refs.visualizerContainer.offsetHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(
-          this.$refs.visualizerContainer.offsetWidth,
-          this.$refs.visualizerContainer.offsetHeight
-        );
-      };
       if (resizeRendererToDisplaySize(renderer)) {
         const canvas = renderer.domElement;
         camera.aspect = canvas.clientWidth / canvas.clientHeight;
         camera.updateProjectionMatrix();
       }
-      window.addEventListener("resize", onWindowResize);
+      window.addEventListener("resize", this.onWindowResize);
+
+      this.camera = camera;
+      this.renderer = renderer;
+    },
+    onWindowResize() {
+      this.camera.aspect =
+        this.$refs.visualizerContainer.offsetWidth /
+        this.$refs.visualizerContainer.offsetHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(
+        this.$refs.visualizerContainer.offsetWidth,
+        this.$refs.visualizerContainer.offsetHeight
+      );
     },
     onMouseMove(event) {
       event.preventDefault();
@@ -94,7 +106,11 @@ export default {
       this.mouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
       this.mouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
     },
-    // ..
+    disposeThree() {
+      this.renderer.dispose();
+      this.geometry.dispose();
+      this.material.dispose();
+    },
   },
   beforeUnmount() {
     window.removeEventListener("resize", this.onWindowResize);
@@ -102,7 +118,7 @@ export default {
       "mousemove",
       this.onMouseMove
     );
-    // Here you should also dispose of materials, geometries, and any other disposable Three.js entities to prevent memory leaks
+    this.disposeThree();
   },
 };
 function resizeRendererToDisplaySize(renderer) {
