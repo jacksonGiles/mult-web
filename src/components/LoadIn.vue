@@ -1,6 +1,17 @@
 <template>
-  <div class="load-container">
-    <img class="load" :src="require('../assets/multlogo2.png')" alt="" />
+  <div
+    class="load-container"
+    :style="listen ? 'background-color: #080808' : 'background-color: #a7cae4;'"
+  >
+    <img
+      class="load"
+      :src="
+        listen
+          ? require('../assets/multlogo-invert1.png')
+          : require('../assets/multlogo2.png')
+      "
+      alt=""
+    />
   </div>
 </template>
 
@@ -8,6 +19,7 @@
 import { gsap } from "gsap";
 
 export default {
+  props: ["listen"],
   async mounted() {
     this.animate();
   },
@@ -35,9 +47,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: 101vh;
   width: 100vw;
-  background-color: #a7cae4;
 }
 .load {
   height: 5vh;
