@@ -17,6 +17,7 @@
   </div>
   <LoadIn
     v-if="!imagesLoaded"
+    :listen="listen"
     class="load-in"
     style="
       z-index: 9999999;
