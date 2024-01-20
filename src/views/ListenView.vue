@@ -7,17 +7,6 @@
           : 'song-vis-container'
       "
     >
-      <LoadCube
-        v-if="!songSelected && $vuetify.display.smAndDown"
-        class="mobile-vis"
-      />
-      <AudioVisualizer
-        v-if="songSelected && $vuetify.display.smAndDown"
-        class="mobile-vis"
-        :key="visualizerKey"
-        :songSrc="songSrc"
-        :songColor="color"
-      />
       <div
         :class="$vuetify.display.smAndDown ? 'song-list-mobile' : 'song-list'"
       >
@@ -26,6 +15,7 @@
             class="song-btn"
             :style="$vuetify.display.smAndDown ? 'width: 80vw;' : ''"
             @click="setSrc(song)"
+            :disabled="loading"
             color="#E8E8E8"
             dark
           >
@@ -33,13 +23,22 @@
           </button>
         </div>
       </div>
-      <LoadCube v-if="!songSelected && !$vuetify.display.smAndDown" />
+      <LoadCube
+        v-if="!songSelected"
+        :style="$vuetify.display.smAndDown ? 'width: 80vw;' : 'width: 20vw;'"
+      />
       <AudioVisualizer
-        v-if="songSelected && !$vuetify.display.smAndDown"
+        v-if="songSelected"
+        :class="$vuetify.display.smAndDown ? 'mobile-vis' : 'desktop-vis'"
+        :style="$vuetify.display.smAndDown ? 'width: 80vw;' : 'width: 20vw;'"
         :key="visualizerKey"
         :songSrc="songSrc"
         :songColor="color"
+        @doneLoading="loading = false"
       />
+      <div v-if="songSelected && loading" class="loading">
+        <v-progress-linear indeterminate color="#e8e8e8"></v-progress-linear>
+      </div>
     </div>
   </div>
 </template>
@@ -89,6 +88,7 @@ export default {
       color: 0,
       songSelected: false,
       visualizerKey: 0,
+      loading: false,
     };
   },
   methods: {
@@ -96,8 +96,9 @@ export default {
       this.songSrc = song.src;
       this.color = song.color;
       this.songSelected = true;
+      this.loading = true;
       this.visualizerKey++; // Increment the key
-      // console.log(this.songSrc);
+      console.log(this.songSrc);
       // console.log(this.color);
     },
   },
@@ -114,6 +115,7 @@ export default {
 }
 .song-list {
   display: grid;
+  width: 20vw;
 }
 .song-list-mobile {
   display: grid;
@@ -126,6 +128,7 @@ export default {
   align-items: center;
   background: rgba(26, 28, 26, 0.5);
   width: 40vw;
+  height: 50vh;
 }
 .song-vis-container-mobile {
   display: flex;
@@ -137,7 +140,18 @@ export default {
   height: 60vh;
 }
 .mobile-vis {
-  height: 40vh;
+  // height: 40vh;
+}
+.desktop-vis {
+  // width: 20vw;
+}
+.loading {
+  height: 50vh;
+  width: 20vw;
+  background-color: black;
+  position: absolute;
+  z-index: 1000000;
+  left: 50%;
 }
 .song-btn {
   color: #e8e8e8;
