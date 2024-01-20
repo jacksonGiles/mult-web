@@ -1,91 +1,53 @@
 <template>
-  <div ref="visualizerContainer" class="visualizer"></div>
+  <canvas ref="visualizerContainer" class="visualizer" v-once> </canvas>
 </template>
 
-<script>
+<script type="module">
 import * as THREE from "three";
 
 export default {
   props: ["songSrc", "songColor"],
   mounted() {
     this.initThree();
-    // this.initAudio();
   },
   data() {
     return {
       audioContext: null,
       analyser: null,
       fftData: null,
+      renderer: null,
+      geometry: null,
+      material: null,
+      camera: null,
+      source: null,
     };
   },
-
   methods: {
     initThree() {
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x070808);
-      const camera = new THREE.PerspectiveCamera(
+      const canvas = this.$refs.visualizerContainer;
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        canvas: canvas,
+      });
+
+      this.camera = new THREE.PerspectiveCamera(
         60,
-        this.$refs.visualizerContainer.offsetWidth /
-          this.$refs.visualizerContainer.offsetHeight,
+        canvas.clientWidth / canvas.clientHeight,
         0.1,
         5
       );
 
-      const renderer = new THREE.WebGLRenderer();
-      renderer.setSize(
-        this.$refs.visualizerContainer.offsetWidth,
-        this.$refs.visualizerContainer.offsetHeight
-      );
-      this.$refs.visualizerContainer.appendChild(renderer.domElement);
+      const renderer = this.renderer;
+      const camera = this.camera;
 
-      // const geometry = new THREE.BoxGeometry(1, 1, 1);
-
-      const geometry = new THREE.BufferGeometry();
-      const material = new THREE.MeshPhongMaterial({ color: this.songColor });
-      const vis = new THREE.Mesh(geometry, material);
-      scene.add(vis);
+      const scene = new THREE.Scene();
+      // scene.background = new THREE.Color(0x070808);
 
       const color = 0xe8e8e8;
       const intensity = 2;
       const light = new THREE.DirectionalLight(color, intensity);
       light.position.set(0, 1, 4);
       scene.add(light);
-
-      camera.position.z = 5;
-
-      // AUDIO ANALYSIS
-      const audioContext = new AudioContext();
-      let analyser;
-      let fftData;
-
-      const initAudio = async () => {
-        const response = await fetch(this.songSrc);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-
-        analyser = audioContext.createAnalyser();
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-
-        source.start();
-        extractFFTData();
-      };
-
-      const extractFFTData = () => {
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        const updateFFTData = () => {
-          analyser.getByteFrequencyData(dataArray);
-          fftData = dataArray;
-          requestAnimationFrame(updateFFTData);
-        };
-
-        updateFFTData();
-      };
-      //
 
       function makeSpherePositions(segmentsAround, segmentsDown) {
         const numVertices = segmentsAround * segmentsDown * 6;
@@ -138,6 +100,7 @@ export default {
 
         return { positions, indices };
       }
+
       const segmentsAround = 24;
       const segmentsDown = 16;
       const { positions, indices } = makeSpherePositions(
@@ -146,6 +109,16 @@ export default {
       );
 
       const normals = positions.slice();
+
+      const geometry = new THREE.BufferGeometry();
+      const material = new THREE.MeshPhongMaterial({ color: this.songColor });
+      this.geometry = geometry;
+      this.material = material;
+
+      const vis = new THREE.Mesh(geometry, material);
+      scene.add(vis);
+
+      camera.position.z = 4;
 
       const positionNumComponents = 3;
       const normalNumComponents = 3;
@@ -162,31 +135,53 @@ export default {
       );
       geometry.setIndex(indices);
 
-      function resizeRendererToDisplaySize(renderer) {
-        const canvas = renderer.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
-        if (needResize) {
-          renderer.setSize(width, height, false);
-        }
+      // AUDIO ANALYSIS
+      const audioContext = new AudioContext();
+      let analyser;
+      let fftData;
 
-        return needResize;
-      }
+      const initAudio = async () => {
+        const response = await fetch(this.songSrc);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        const source = audioContext.createBufferSource();
+        this.source = source;
+        source.buffer = audioBuffer;
+
+        analyser = audioContext.createAnalyser();
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        source.start();
+        extractFFTData();
+      };
+
+      const extractFFTData = () => {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const updateFFTData = () => {
+          analyser.getByteFrequencyData(dataArray);
+          fftData = dataArray;
+          requestAnimationFrame(updateFFTData);
+        };
+
+        updateFFTData();
+      };
 
       const temp = new THREE.Vector3();
 
-      function render(time) {
-        time *= 0.001;
-
-        if (resizeRendererToDisplaySize(renderer)) {
-          const canvas = renderer.domElement;
-          camera.aspect = canvas.clientWidth / canvas.clientHeight;
-          camera.updateProjectionMatrix();
-        }
-
+      const render = (time) => {
         if (fftData && fftData.length > 0) {
-          // Check if fftData is defined and has elements
+          time *= 0.001;
+
+          this.$emit("doneLoading");
+
+          if (this.resizeRendererToDisplaySize(renderer)) {
+            const canvas = renderer.domElement;
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+          }
           for (let i = 0; i < positions.length; i += 3) {
             const quad = (i / 12) | 0;
             const ringId = (quad / segmentsAround) | 0;
@@ -209,33 +204,54 @@ export default {
           }
 
           positionAttribute.needsUpdate = true;
+
+          renderer.render(scene, camera);
         }
-
-        renderer.render(scene, camera);
-
         requestAnimationFrame(render);
-      }
+      };
 
       initAudio();
       requestAnimationFrame(render);
 
-      const onWindowResize = () => {
-        camera.aspect =
-          this.$refs.visualizerContainer.offsetWidth /
-          this.$refs.visualizerContainer.offsetHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(
-          this.$refs.visualizerContainer.offsetWidth,
-          this.$refs.visualizerContainer.offsetHeight
-        );
-      };
-      // if (resizeRendererToDisplaySize(renderer)) {
-      //   const canvas = renderer.domElement;
-      //   camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      //   camera.updateProjectionMatrix();
-      // }
-      window.addEventListener("resize", onWindowResize);
+      this.onWindowResize();
+
+      window.addEventListener("resize", this.onWindowResize, false);
     },
+    resizeRendererToDisplaySize() {
+      const canvas = this.renderer.domElement;
+      const pixelRatio = window.devicePixelRatio;
+      const width = (canvas.clientWidth * pixelRatio) | 0;
+      const height = (canvas.clientHeight * pixelRatio) | 0;
+      const needResize =
+        this.renderer.width !== width || this.renderer.height !== height;
+      if (needResize) {
+        this.renderer.setSize(width, height, false);
+      }
+      return needResize;
+    },
+
+    onWindowResize() {
+      const canvas = this.$refs.visualizerContainer;
+
+      const pixelRatio = window.devicePixelRatio;
+      const width = (canvas.clientWidth * pixelRatio) | 0;
+      const height = (canvas.clientHeight * pixelRatio) | 0;
+
+      this.renderer.setSize(width, height, false);
+
+      this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      this.camera.updateProjectionMatrix();
+    },
+    disposeThree() {
+      this.renderer.dispose();
+      this.geometry.dispose();
+      this.material.dispose();
+      this.source.stop();
+    },
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.onWindowResize);
+    this.disposeThree();
   },
 };
 </script>
