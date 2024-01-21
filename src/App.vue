@@ -69,7 +69,11 @@ export default {
       let backgroundSize, backgroundPosition;
 
       if (this.listen) {
-        backgroundSize = this.$vuetify.display.smAndDown ? "180%" : "100%";
+        backgroundSize = this.$vuetify.display.smAndDown
+          ? "180%"
+          : this.$vuetify.display.mdAndDown
+          ? "108%"
+          : "100%";
         backgroundPosition = this.$vuetify.display.smAndDown
           ? this.mobileAltPosition
           : this.bgAltPosition;
