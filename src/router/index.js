@@ -5,7 +5,7 @@ import HomeView from "../views/HomeView.vue";
 import ContactView from "../views/ContactView.vue";
 import MusicView from "../views/MusicView.vue";
 import MerchView from "../views/MerchView.vue";
-// import ListenView from "../views/ListenView.vue";
+import ListenView from "../views/ListenView.vue";
 // import SandboxView from "../views/SandboxView.vue";
 
 const routes = [
@@ -26,11 +26,12 @@ const routes = [
     component: ContactView,
     meta: { title: "MULT | CONTACT" },
   },
-  // {
-  //   path: "/listen",
-  //   name: "Listen",
-  //   component: ListenView,
-  // },
+  {
+    path: "/listen",
+    name: "Listen",
+    component: ListenView,
+    meta: { title: "MULT | LISTEN" },
+  },
   {
     path: "/music",
     name: "Music",
