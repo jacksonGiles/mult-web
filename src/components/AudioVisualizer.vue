@@ -1,5 +1,5 @@
 <template>
-  <canvas ref="visualizerContainer" class="visualizer" v-once> </canvas>
+  <canvas ref="visualizerContainer" class="visualizer" v-once></canvas>
 </template>
 
 <script type="module">
@@ -151,6 +151,10 @@ export default {
         analyser = audioContext.createAnalyser();
         source.connect(analyser);
         analyser.connect(audioContext.destination);
+
+        source.onended = () => {
+          this.$emit("songFinished");
+        };
 
         source.start();
         extractFFTData();
