@@ -2,18 +2,18 @@
   <div class="listen-page">
     <div
       :class="
-        $vuetify.display.smAndDown
+        $vuetify.display.mdAndDown
           ? 'song-vis-container-mobile'
           : 'song-vis-container'
       "
     >
       <div
-        :class="$vuetify.display.smAndDown ? 'song-list-mobile' : 'song-list'"
+        :class="$vuetify.display.mdAndDown ? 'song-list-mobile' : 'song-list'"
       >
         <div v-for="(song, index) in songList" :key="index">
           <button
             class="song-btn"
-            :style="$vuetify.display.smAndDown ? 'width: 80vw;' : ''"
+            :style="$vuetify.display.mdAndDown ? 'width: 80vw;' : ''"
             @click="setSrc(song)"
             :disabled="loading"
             color="#E8E8E8"
@@ -25,18 +25,30 @@
       </div>
       <LoadCube
         v-if="!songSelected"
-        :style="$vuetify.display.smAndDown ? 'width: 80vw;' : 'width: 20vw;'"
+        :style="
+          $vuetify.display.mdAndDown
+            ? 'width: 80vw; height: 40vh; position: relative;'
+            : 'width: 20vw;'
+        "
       />
       <AudioVisualizer
         v-if="songSelected"
-        :class="$vuetify.display.smAndDown ? 'mobile-vis' : 'desktop-vis'"
-        :style="$vuetify.display.smAndDown ? 'width: 80vw;' : 'width: 20vw;'"
+        :class="$vuetify.display.mdAndDown ? 'mobile-vis' : 'desktop-vis'"
+        :style="
+          $vuetify.display.mdAndDown
+            ? 'width: 80vw; height: 40vh; position: relative;'
+            : 'width: 20vw;'
+        "
         :key="visualizerKey"
         :songSrc="songSrc"
         :songColor="color"
         @doneLoading="loading = false"
+        @songFinished="songSelected = false"
       />
-      <div v-if="songSelected && loading" class="loading">
+      <div
+        v-if="songSelected && loading"
+        :class="$vuetify.display.mdAndDown ? 'loading-mobile' : 'loading'"
+      >
         <v-progress-linear indeterminate color="#e8e8e8"></v-progress-linear>
       </div>
     </div>
@@ -110,6 +122,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
   height: 80vh;
   width: 100vw;
 }
@@ -121,6 +134,7 @@ export default {
   display: grid;
   height: 20vh;
   align-content: center;
+  // margin: 5vh 0;
 }
 .song-vis-container {
   display: flex;
@@ -132,7 +146,7 @@ export default {
 }
 .song-vis-container-mobile {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   justify-content: space-between;
   align-items: center;
   background: rgba(26, 28, 26, 0.5);
@@ -152,6 +166,19 @@ export default {
   position: absolute;
   z-index: 1000000;
   left: 50%;
+}
+.loading-mobile {
+  height: 40vh;
+  width: 80vw;
+  background-color: black;
+  // background-color: blue;
+
+  position: absolute;
+  z-index: 1000000;
+  // top: 50%; // Positions the top of the element at the middle of the parent
+  top: 37.4%;
+  left: 49.9%; // Positions the left of the element at the middle of the parent
+  transform: translate(-50%, -50%);
 }
 .song-btn {
   color: #e8e8e8;
