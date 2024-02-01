@@ -52,6 +52,7 @@
                 "
               >
                 <a
+                  class="music-icon"
                   href="https://open.spotify.com/track/0aw5XnyEeMrvW2h6ouhYQl?si=6c89720fad324dc8"
                   target="_blank"
                   alt="Link to Spotify"
@@ -92,6 +93,7 @@
                   </button>
                 </a>
                 <a
+                  class="music-icon"
                   href="https://music.apple.com/us/album/sleep/1666457241?i=1666457242"
                   target="_blank"
                   alt="Link to Apple Music"
@@ -132,6 +134,7 @@
                   </button>
                 </a>
                 <a
+                  class="music-icon"
                   href="https://youtu.be/qGjYhNxiXQw?si=vGn-apYW_7N8tAIa"
                   target="_blank"
                   alt="Link to YouTube"
@@ -172,6 +175,7 @@
                   </button>
                 </a>
                 <a
+                  class="music-icon"
                   href="https://mult-band.bandcamp.com/track/sleep"
                   target="_blank"
                   alt="Link to Bandcamp"
@@ -329,6 +333,10 @@ export default {
 }
 .music-icons > * {
   margin: 0.5em;
+}
+.music-icon:hover {
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
 }
 .link-button {
   text-decoration: none;

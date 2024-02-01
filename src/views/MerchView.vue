@@ -300,6 +300,10 @@ export default {
   // filter: blur(0.3px);
   border-radius: 10px;
 }
+.size-button:hover {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
 .size-button-selected {
   background-color: #b2d3ee;
   // mix-blend-mode: difference;
@@ -312,6 +316,11 @@ export default {
   background-color: #b2d3ee;
   color: #2c3e50;
   border-radius: 10px;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+.cart-button:hover {
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
 }
 .payment-box {
   display: grid;
