@@ -4,6 +4,13 @@
       <router-link
         class="link"
         :class="listen ? 'listen-link' : ''"
+        to="/"
+        @click="closeMenu"
+        >HOME</router-link
+      >
+      <router-link
+        class="link"
+        :class="listen ? 'listen-link' : ''"
         to="/music"
         @click="closeMenu"
         >MUSIC</router-link
