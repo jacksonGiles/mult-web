@@ -137,6 +137,6 @@ function resizeRendererToDisplaySize(renderer) {
 <style lang="scss" scoped>
 .visualizer {
   width: 100%;
-  height: 50vh;
+  height: 60vh;
 }
 </style>
