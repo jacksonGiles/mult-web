@@ -190,9 +190,7 @@ export default {
   methods: {
     async fetchItems() {
       try {
-        const response = await axios.get(
-          "https://api.bigcartel.com/multusa/products"
-        );
+        const response = await axios.get(`${process.env.VUE_APP_MERCH_ROUTE}`);
         this.items = response.data;
       } catch (error) {
         console.log(error);
