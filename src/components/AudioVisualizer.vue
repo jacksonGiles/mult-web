@@ -118,7 +118,7 @@ export default {
       const vis = new THREE.Mesh(geometry, material);
       scene.add(vis);
 
-      camera.position.z = 4;
+      camera.position.z = 5;
 
       const positionNumComponents = 3;
       const normalNumComponents = 3;
@@ -263,6 +263,6 @@ export default {
 <style lang="scss" scoped>
 .visualizer {
   width: 100%;
-  height: 50vh;
+  height: 60vh;
 }
 </style>
