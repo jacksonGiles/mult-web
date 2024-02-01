@@ -1,5 +1,12 @@
 <template>
-  <div class="listen-page">
+  <LoginPage
+    v-if="!loggedIn"
+    class="login"
+    @login="login"
+    :isError="isError"
+    :errorMessage="errorMessage"
+  />
+  <div v-if="loggedIn" class="listen-page">
     <div
       :class="
         $vuetify.display.mdAndDown
@@ -28,7 +35,7 @@
         :style="
           $vuetify.display.mdAndDown
             ? 'width: 80vw; height: 40vh; position: relative;'
-            : 'width: 20vw;'
+            : 'width: 25vw;'
         "
       />
       <AudioVisualizer
@@ -37,7 +44,7 @@
         :style="
           $vuetify.display.mdAndDown
             ? 'width: 80vw; height: 40vh; position: relative;'
-            : 'width: 20vw;'
+            : 'width: 25vw;'
         "
         :key="visualizerKey"
         :songSrc="songSrc"
@@ -56,12 +63,15 @@
 </template>
 
 <script>
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import AudioVisualizer from "../components/AudioVisualizer.vue";
 import LoadCube from "../components/LoadCube.vue";
+import LoginPage from "../components/LoginPage.vue";
 export default {
   components: {
     AudioVisualizer,
     LoadCube,
+    LoginPage,
   },
   mounted() {
     this.$emit("listen", true);
@@ -101,6 +111,10 @@ export default {
       songSelected: false,
       visualizerKey: 0,
       loading: false,
+
+      loggedIn: false,
+      isError: false,
+      errorMessage: "",
     };
   },
   methods: {
@@ -112,6 +126,28 @@ export default {
       this.visualizerKey++; // Increment the key
       console.log(this.songSrc);
       // console.log(this.color);
+    },
+    login(password) {
+      const email = "generic_user@generic.com";
+      const auth = getAuth();
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+
+          user.getIdToken().then((token) => {
+            localStorage.setItem("userToken", token);
+            this.loggedIn = true;
+          });
+        })
+        .catch((error) => {
+          this.isError = true;
+          if (error.code === "auth/invalid-credential") {
+            this.errorMessage = "Incorrect password";
+          } else {
+            this.errorMessage = "There was an error. Try again later.";
+          }
+        });
     },
   },
 };
@@ -128,7 +164,7 @@ export default {
 }
 .song-list {
   display: grid;
-  width: 20vw;
+  width: 25vw;
 }
 .song-list-mobile {
   display: grid;
@@ -141,8 +177,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   background: rgba(26, 28, 26, 0.5);
-  width: 40vw;
-  height: 50vh;
+  width: 50vw;
+  height: 60vh;
 }
 .song-vis-container-mobile {
   display: flex;
@@ -160,8 +196,8 @@ export default {
   // width: 20vw;
 }
 .loading {
-  height: 50vh;
-  width: 20vw;
+  height: 60vh;
+  width: 25vw;
   background-color: black;
   position: absolute;
   z-index: 1000000;
@@ -184,12 +220,20 @@ export default {
   color: #e8e8e8;
   // filter: blur(0.4px);
   transition: color 0.3s ease, opacity 0.3s ease;
-  width: 20vw;
+  width: 25vw;
 }
 .song-btn:hover {
   color: #181c1c;
   background-color: #e8e8e8;
   opacity: 0.8;
+}
+.login {
+  position: absolute;
+  z-index: 100000;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .fade-enter-active,
 .fade-leave-active {
