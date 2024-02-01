@@ -138,10 +138,13 @@ export default {
           img.src = imageSrc;
         });
       });
-      setTimeout(() => {
-        this.imagesLoaded = true;
-      }, 3000);
-      return Promise.all(promises);
+      if (promises) {
+        setTimeout(() => {
+          this.imagesLoaded = true;
+        }, 3000);
+
+        return Promise.all(promises);
+      }
     },
     leave(el, done) {
       gsap.to(el, { opacity: 0, duration: 0.4, onComplete: done });
