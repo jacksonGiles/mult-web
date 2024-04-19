@@ -59,51 +59,59 @@
         <v-progress-linear indeterminate color="#e8e8e8"></v-progress-linear>
       </div>
     </div>
+    <!-- v-if="songSelected" -->
+    <PlayBar
+      v-if="songSelected"
+      class="play-bar-component"
+      :style="$vuetify.display.mdAndDown ? 'top: 87%' : ''"
+    />
   </div>
 </template>
 
 <script>
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { mapActions } from "vuex";
 import AudioVisualizer from "../components/AudioVisualizer.vue";
 import LoadCube from "../components/LoadCube.vue";
 import LoginPage from "../components/LoginPage.vue";
+import PlayBar from "../components/PlayBar.vue";
 export default {
   components: {
     AudioVisualizer,
     LoadCube,
     LoginPage,
+    PlayBar,
   },
   mounted() {
     this.$emit("listen", true);
   },
   data() {
     return {
-      // grab from database later
       songList: [
         {
-          title: "CARDINAL",
-          src: require("../assets/songs/CARDINAL-rough.wav"),
-          color: 0x901215,
-        },
-        {
           title: "BLACKOUT",
-          src: require("../assets/songs/BLACKOUT rough.wav"),
+          src: require("../assets/songs/01 BLACKOUT.wav"),
           color: 0xa2994b,
         },
         {
           title: "SILHOUETTES",
-          src: require("../assets/songs/SILHOUETTE rough.wav"),
+          src: require("../assets/songs/02 SILHOUETTES.wav"),
           color: 0x25367f,
         },
         {
           title: "ASHEN",
-          src: require("../assets/songs/ASHEN rough.wav"),
+          src: require("../assets/songs/03 ASHEN.wav"),
           color: 0x16537e,
         },
         {
+          title: "CARDINAL",
+          src: require("../assets/songs/04 CARDINAL.wav"),
+          color: 0xc92f2f,
+        },
+        {
           title: "BACK AROUND",
-          src: require("../assets/songs/ben song with vox.wav"),
-          color: 0x443371,
+          src: require("../assets/songs/05 BACK AROUND.wav"),
+          color: 0x81993e,
         },
       ],
       songSrc: "",
@@ -118,14 +126,14 @@ export default {
     };
   },
   methods: {
+    ...mapActions(["setTitle", "togglePlay", "setCurrentTime", "setCurrent"]),
     setSrc(song) {
+      this.$store.dispatch("setTitle", song.title); // Set the title in the Vuex store
       this.songSrc = song.src;
       this.color = song.color;
       this.songSelected = true;
       this.loading = true;
-      this.visualizerKey++; // Increment the key
-      console.log(this.songSrc);
-      // console.log(this.color);
+      this.visualizerKey += 1;
     },
     login(password) {
       const email = "generic_user@generic.com";
@@ -235,12 +243,8 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s; /* Adjust the duration as needed */
-}
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
+.play-bar-component {
+  position: absolute;
+  top: 95%;
 }
 </style>
