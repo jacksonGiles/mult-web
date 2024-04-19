@@ -4,11 +4,18 @@
 
 <script type="module">
 import * as THREE from "three";
-
+import { mapState, mapActions } from "vuex";
 export default {
-  props: ["songSrc", "songColor"],
+  props: ["songSrc", "songColor", "visualizerKey"],
+  components: {},
   mounted() {
     this.initThree();
+    const audioContext = new AudioContext({
+      sampleRate: 44100,
+      latencyHint: "playback",
+      sampleSize: 1024,
+    });
+    this.audioContext = audioContext;
   },
   data() {
     return {
@@ -20,9 +27,21 @@ export default {
       material: null,
       camera: null,
       source: null,
+      startTime: 0,
+      durationLocal: 0,
+      currentLocal: 0,
     };
   },
+  computed: {
+    ...mapState(["currentTime", "duration", "play"]),
+  },
   methods: {
+    ...mapActions([
+      "setDuration",
+      "setCurrentTime",
+      "togglePlay",
+      "setCurrent",
+    ]),
     initThree() {
       const canvas = this.$refs.visualizerContainer;
       this.renderer = new THREE.WebGLRenderer({
@@ -136,27 +155,49 @@ export default {
       geometry.setIndex(indices);
 
       // AUDIO ANALYSIS
-      const audioContext = new AudioContext();
+      // const audioContext = new AudioContext({
+      //   sampleRate: 44100,
+      // });
+      // this.audioContext = audioContext;
       let analyser;
       let fftData;
 
       const initAudio = async () => {
         const response = await fetch(this.songSrc);
         const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        const source = audioContext.createBufferSource();
+        const audioBuffer = await this.audioContext.decodeAudioData(
+          arrayBuffer
+        );
+        const source = this.audioContext.createBufferSource();
         this.source = source;
         source.buffer = audioBuffer;
 
-        analyser = audioContext.createAnalyser();
+        const time = audioBuffer.duration;
+        this.durationLocal = time;
+
+        var hrs = ~~(time / 3600);
+        var mins = ~~((time % 3600) / 60);
+        var secs = ~~time % 60;
+
+        var ret = "";
+        if (hrs > 0) {
+          ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+        }
+        ret += "" + String(mins) + ":" + (secs < 10 ? "0" : "");
+        ret += "" + secs;
+        this.$store.dispatch("setDuration", `${ret}`);
+
+        analyser = this.audioContext.createAnalyser();
         source.connect(analyser);
-        analyser.connect(audioContext.destination);
+        analyser.connect(this.audioContext.destination);
 
         source.onended = () => {
           this.$emit("songFinished");
+          this.$store.dispatch("setDuration", 0);
         };
 
-        source.start();
+        this.$store.dispatch("togglePlay");
+        source.start(0);
         extractFFTData();
       };
 
@@ -175,9 +216,32 @@ export default {
 
       const temp = new THREE.Vector3();
 
+      // const startTime = 0;
+
       const render = (time) => {
         if (fftData && fftData.length > 0) {
           time *= 0.001;
+
+          if (this.play) {
+            const currentTime = this.audioContext.currentTime;
+            this.currentLocal = currentTime;
+
+            var hrs = ~~(currentTime / 3600);
+            var mins = ~~((currentTime % 3600) / 60);
+            var secs = ~~currentTime % 60;
+
+            var ret = "";
+            if (hrs > 0) {
+              ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+            }
+            ret += "" + String(mins) + ":" + (secs < 10 ? "0" : "");
+            ret += "" + secs;
+            this.$store.dispatch("setCurrentTime", `${ret}`);
+            this.$store.dispatch("setProgress", {
+              current: currentTime,
+              total: this.durationLocal,
+            });
+          }
 
           this.$emit("doneLoading");
 
@@ -195,6 +259,9 @@ export default {
             temp.fromArray(normals, i);
 
             const fftValue = fftData[ringId % fftData.length];
+            if (fftValue > 255) {
+              console.log(fftValue);
+            }
             const scale = THREE.MathUtils.mapLinear(fftValue, 0, 255, 1, 2);
 
             temp.multiplyScalar(
@@ -210,6 +277,11 @@ export default {
           positionAttribute.needsUpdate = true;
 
           renderer.render(scene, camera);
+          if (!this.play && this.currentLocal > 0) {
+            this.audioContext.suspend();
+          } else if (this.play && this.currentLocal > 0) {
+            this.audioContext.resume();
+          }
         }
         requestAnimationFrame(render);
       };
@@ -250,12 +322,13 @@ export default {
       this.renderer.dispose();
       this.geometry.dispose();
       this.material.dispose();
-      this.source.stop();
+      this.source.stop(0);
     },
   },
   beforeUnmount() {
     window.removeEventListener("resize", this.onWindowResize);
     this.disposeThree();
+    this.$store.dispatch("togglePlay");
   },
 };
 </script>
@@ -263,6 +336,6 @@ export default {
 <style lang="scss" scoped>
 .visualizer {
   width: 100%;
-  height: 60vh;
+  height: 100%;
 }
 </style>
