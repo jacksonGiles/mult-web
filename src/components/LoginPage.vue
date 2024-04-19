@@ -24,16 +24,36 @@
     <div v-if="isError" class="error-message">
       <p style="color: red">{{ errorMessage }}</p>
     </div>
+    <div v-if="!isError" class="safari-message">
+      <p
+        style="color: #080808"
+        :style="$vuetify.display.xs ? 'max-width: 250px' : ''"
+        v-html="isSafari ? browserMessage : null"
+      ></p>
+      <p
+        style="color: #080808"
+        v-html="$vuetify.display.mdAndDown ? mobileMessage : null"
+      ></p>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   props: ["isError", "errorMessage"],
+  mounted() {
+    this.isSafari =
+      !navigator.userAgent.includes("Chrome") &&
+      navigator.userAgent.includes("Safari");
+  },
   data() {
     return {
       valid: false,
       password: "",
+      isSafari: false,
+      mobileMessage: "For mobile devices, please turn on ringer.",
+      browserMessage:
+        "Please use Google Chrome for best audio and visual experience.",
     };
   },
   methods: {
@@ -86,5 +106,9 @@ export default {
   position: absolute;
   bottom: 35%;
   color: red;
+}
+.safari-message {
+  position: absolute;
+  bottom: 30%;
 }
 </style>
